@@ -1,0 +1,13 @@
+*~
+*.out
+*.html
+*.tab.*
+*.yy.*
+*#*
+*.ini
+!config.ini
+*.txt
+!stats.txt
+mcpat
+gem5ToMcPAT
+out.xml
