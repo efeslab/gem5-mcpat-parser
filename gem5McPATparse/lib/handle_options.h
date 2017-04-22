@@ -51,8 +51,8 @@ static struct option long_options[] = {
 void usage(int i)
 {
 	printf(
-		"Usage:  gem5ToMcPAT [OPTIONS]\n"
-		"Launch parser gem5ToMcPAT\n"
+		"Usage: gem5-mcpat-parser [OPTIONS]\n"
+		"Launch parser gem5-mcpat-parser\n"
 		"Options:\n"
 		"  -x <file>, --xmltemplate=<file>: XML template\n"
 		"  -c <file>, --config=<file>: config.ini file (not JSON!)\n"

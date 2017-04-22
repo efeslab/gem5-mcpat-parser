@@ -9,5 +9,5 @@
 *.txt
 !stats.txt
 mcpat
-gem5ToMcPAT
-out.xml
+gem5-mcpat-parser
+configuration.xml
