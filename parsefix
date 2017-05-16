@@ -1,0 +1,121 @@
+#!/bin/bash
+
+# Patches the arguments mentioned below in the McPAT XML file after the broken parser fills it with incorrect negative values 
+# Add your own arguments if needed
+# Requires xmlstarlet 
+
+# Example
+# ./parsefix xml_file stats.txt
+
+committed_fp_instructions="$(grep 'system.cpu.commit.fp_insts' $2 | grep -Eo '[0-9]+')"
+rename_reads="$(grep 'system.cpu.rename.int_rename_lookups' $2 | grep -Eo '[0-9]+')"
+write_misses="$(grep 'system.cpu.dcache.WriteReq_misses::total' $2 | grep -Eo '[0-9]+')"
+write_accesses="$(grep 'system.cpu.dcache.WriteReq_accesses::total' $2 | grep -Eo '[0-9]+')"
+itlb_total_accesses="$(grep 'system.cpu.itb_walker_cache.tags.tag_accesses' $2 | grep -Eo '[0-9]+')"
+dtlb_total_accesses="$(grep 'system.cpu.dtb_walker_cache.tags.tag_accesses' $2 | grep -Eo '[0-9]+')"
+btb_write_accesses="$(grep 'system.cpu.commit.branches' $2 | grep -Eo '[0-9]+')"
+system_total_cycles="$(grep 'system.cpu.numCycles' $2 | grep -Eo '[0-9]+')"
+system_idleCycles="$(grep 'system.cpu.idleCycles' $2 | grep -Eo '[0-9]+')"
+system_total_instructions="$(grep 'system.cpu.decode.DecodedInsts' $2 | grep -Eo '[0-9]+')"
+inst_window_writes="$(grep 'system.cpu.iq.int_inst_queue_write' $2 | grep -Eo '[0-9]+')"
+inst_window_wakeup_accesses="$(grep 'system.cpu.iq.int_inst_queue_wakeup_accesses' $2 | grep -Eo '[0-9]+')"
+fp_inst_window_reads="$(grep 'system.cpu.iq.fp_inst_queue_reads' $2 | grep -Eo '[0-9]+')"
+fp_inst_window_writes="$(grep 'system.cpu.iq.fp_inst_queue_writes' $2 | grep -Eo '[0-9]+')"
+fp_inst_window_wakeup_accesses="$(grep 'system.cpu.iq.fp_inst_queue_wakeup_accesses' $2 | grep -Eo '[0-9]+')"
+int_regfile_reads="$(grep 'system.cpu.int_regfile_reads' $2 | grep -Eo '[0-9]+')"
+int_regfile_writes="$(grep 'system.cpu.int_regfile_writes' $2 | grep -Eo '[0-9]+')"
+ialu_accesses="$(grep 'system.cpu.iq.int_alu_accesses' $2 | grep -Eo '[0-9]+')"
+fpu_accesses="$(grep 'system.cpu.iq.fp_alu_accesses' $2 | grep -Eo '[0-9]+')"
+rename_RenamedOperands="$(grep 'system.cpu.rename.RenamedOperands' $2 | grep -Eo '[0-9]+')"
+int_rename_lookups="$(grep 'system.cpu.rename.int_rename_lookups' $2 | grep -Eo '[0-9]+')"
+rename_RenamedLookups="$(grep 'system.cpu.rename.RenameLookups' $2 | grep -Eo '[0-9]+')"
+fp_rename_lookups="$(grep 'system.cpu.rename.fp_rename_lookups' $2 | grep -Eo '[0-9]+')"
+
+echo "committed_fp_instructions -> $((committed_fp_instructions))"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='committed_fp_instructions']/@value" -v $((committed_fp_instructions)) $1
+
+echo "rename_reads -> $((rename_reads))"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='rename_reads']/@value" -v $((rename_reads)) $1
+
+echo "system.core0.dcache.write_misses -> $((write_misses))"
+xmlstarlet edit -L -u "/component/component/component/component[5]/stat[@name='write_misses']/@value" -v $((write_misses)) $1
+
+echo "system.core0.dcache.write_accesses -> $((write_accesses))"
+xmlstarlet edit -L -u "/component/component/component/component[5]/stat[@name='write_accesses']/@value" -v $((write_accesses)) $1
+
+echo "itlb.total_accesses -> $((itlb_total_accesses))"
+xmlstarlet edit -L -u "/component/component/component/component[2]/stat[@name='total_accesses']/@value" -v $((itlb_total_accesses)) $1
+
+echo "dtlb.total_accesses -> $((dtlb_total_accesses))"
+xmlstarlet edit -L -u "/component/component/component/component[4]/stat[@name='total_accesses']/@value" -v $((dtlb_total_accesses)) $1
+
+echo "btb.write_accesses -> $((btb_write_accesses))"
+xmlstarlet edit -L -u "/component/component/component/component[6]/stat[@name='write_accesses']/@value" -v $((btb_write_accesses)) $1
+
+echo "btb.write_accesses -> $((btb_write_accesses))"
+xmlstarlet edit -L -u "/component/component/component/component[6]/stat[@name='write_accesses']/@value" -v $((btb_write_accesses)) $1
+
+echo "system.total_cycles -> $((system_total_cycles))"
+xmlstarlet edit -L -u "/component/component/stat[@name='total_cycles']/@value" -v $((system_total_cycles)) $1
+
+echo "total_instructions -> $((system_total_instructions))"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='total_instructions']/@value" -v $((system_total_instructions)) $1
+
+echo "system.busy_cycles -> $((system_total_cycles-system_idleCycles))"
+xmlstarlet edit -L -u "/component/component/stat[@name='busy_cycles']/@value" -v $((system_total_cycles-system_idleCycles)) $1
+
+echo "system.core0.busy_cycles -> $((system_total_cycles-system_idleCycles))"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='busy_cycles']/@value" -v $((system_total_cycles-system_idleCycles)) $1
+
+echo "inst_window_writes -> $((inst_window_writes))"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='inst_window_writes']/@value" -v $((inst_window_writes)) $1
+
+echo "inst_window_wakeup_accesses -> $((inst_window_wakeup_accesses))"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='inst_window_wakeup_accesses']/@value" -v $((inst_window_wakeup_accesses)) $1
+
+echo "fp_inst_window_reads -> $((fp_inst_window_reads))"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='fp_inst_window_reads']/@value" -v $((fp_inst_window_reads)) $1
+
+echo "fp_inst_window_writes -> $((fp_inst_window_writes))"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='fp_inst_window_writes']/@value" -v $((fp_inst_window_writes)) $1
+
+echo "fp_inst_window_wakeup_accesses -> $((fp_inst_window_wakeup_accesses))"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='fp_inst_window_wakeup_accesses']/@value" -v $((fp_inst_window_wakeup_accesses)) $1
+
+echo "int_regfile_reads -> $((int_regfile_reads))"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='int_regfile_reads']/@value" -v $((int_regfile_reads)) $1
+
+echo "int_regfile_writes -> $((int_regfile_writes))"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='int_regfile_writes']/@value" -v $((int_regfile_writes)) $1
+
+echo "ialu_accesses -> $((ialu_accesses))"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='ialu_accesses']/@value" -v $((ialu_accesses)) $1
+
+echo "fpu_accesses -> $((fpu_accesses))"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='fpu_accesses']/@value" -v $((fpu_accesses)) $1
+
+echo "system.core0.rename_reads -> $((int_rename_lookups))"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='rename_reads']/@value" -v $((int_rename_lookups)) $1
+
+if [ ${#rename_RenamedLookups} -gt 0 ];
+then
+
+	if [ "${rename_RenamedLookups:0}" -gt 0 ];
+	then
+		echo "system.core0.rename_writes -> $(bc <<< "($rename_RenamedOperands*$int_rename_lookups)/$rename_RenamedLookups")"
+		xmlstarlet edit -L -u "/component/component/component/stat[@name='rename_writes']/@value" -v $(bc <<< "($rename_RenamedOperands*$int_rename_lookups)/$rename_RenamedLookups") $1
+		echo "system.core0.fp_rename_writes -> $(bc <<< "($rename_RenamedOperands*$fp_rename_lookups)/$rename_RenamedLookups")"
+		xmlstarlet edit -L -u "/component/component/component/stat[@name='fp_rename_writes']/@value" -v $(bc <<< "($rename_RenamedOperands*$fp_rename_lookups)/$rename_RenamedLookups") $1
+	else
+		echo "system.core0.rename_writes -> 0"
+		xmlstarlet edit -L -u "/component/component/component/stat[@name='rename_writes']/@value" -v '0' $1
+		echo "system.core0.fp_rename_writes -> 0"
+		xmlstarlet edit -L -u "/component/component/component/stat[@name='fp_rename_writes']/@value" -v '0' $1
+	fi
+fi
+
+echo "system.core0.cdb_alu_accesses -> 0"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='cdb_alu_accesses']/@value" -v '0' $1
+echo "system.core0.cdb_fpu_accesses -> 0"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='cdb_fpu_accesses']/@value" -v '0' $1
+
