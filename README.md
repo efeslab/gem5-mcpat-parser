@@ -4,7 +4,7 @@ A parser to convert the simulation data output of gem5 into an XML file format f
 This parser is based on a modified version of the 2015 version which can be found at this repository https://github.com/markoshorro/gem5McPATparse.
 
 The parser's parsing is broken as some arguments will be assigned negative values. I have added a script called "parsefix" to fix this where it greps the required value and uses xmlstarlet to write the
-correct value back to the configured XML file. You can add your own lines to the script if needed (just replicate the lines and add if-checks if necessary) The parser does not seem to use the config.ini file in any way at all.
+correct value back to the configured XML file. You can add your own lines to the script if needed (just replicate the lines and add if-checks if necessary)
 
 This parser does not support
 
@@ -28,11 +28,11 @@ You can run the compute script which will
 
 	1) Run gem5-mcpat-parser first to parse the stats.txt and create a configured (but broken) XML file.
 	2) Run parsefix to apply the correct values to the XML file.
-	3) Run McPAT with -print_level 5 on the final file
+	3) Run McPAT on the final file
 
 by doing 
 	
-	./compute stats.txt config.ini template.xml configuration.xml gem5-mcpat-parser/gem5-mcpat-parser mcpat/mcpat
+	./compute stats.txt config.ini template.xml configuration.xml gem5-mcpat-parser/gem5-mcpat-parser mcpat/mcpat 5
 
 Where 
 	stats.txt, config.ini are the gem5 simulation data files.
@@ -45,6 +45,8 @@ Use the -h option for more information.
 
 To my understanding, the original creator of the parser made it such that this parser only works for single core simulations. If you try to use this parser with more than 1 CPU (--num-cpus=2 etc) then it will generate a lot more warnings.
 
+Feel free to drop a comment/issue if you think some values are not correct i.e the parser calculates it wrongly or something else is missing etc. Everyone is welcome to modify or improve the parser. 
+I would love to get it working for fast-forwarding, checkpointing and everything else.
 
 #Note:
 
