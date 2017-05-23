@@ -28,11 +28,11 @@ You can run the compute script which will
 
 	1) Run gem5-mcpat-parser first to parse the stats.txt and create a configured (but broken) XML file.
 	2) Run parsefix to apply the correct values to the XML file.
-	3) Run McPAT on the final file
+	3) Run McPAT on the final file which will write the contents to a file on your choice
 
 by doing 
 	
-	./compute stats.txt config.ini template.xml configuration.xml gem5-mcpat-parser/gem5-mcpat-parser mcpat/mcpat 5
+	./compute stats.txt config.ini template.xml configuration.xml gem5-mcpat-parser/gem5-mcpat-parser mcpat/mcpat 5 > results.txt
 
 Where 
 	stats.txt, config.ini are the gem5 simulation data files.
@@ -57,5 +57,11 @@ The following modifications were made to this parser:
 2) Renaming from gem5McPATparse to gem5-mcpat-parser.
 
 3) Re-organised the file structuring and makefile 
+
+
+Related problems
+
+Currently the script has no way of knowing which memory model gem5 uses (Classic vs Ruby) and McPAT seems only to support directory based cache coherence protocols.
+The script is missing some components of McPAT such as PCIE and NoC etc.
 
 
