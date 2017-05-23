@@ -16,6 +16,8 @@ rename_RenamedOperands="$(grep "$cpu_name.rename.RenamedOperands" $2 | grep -Eo 
 int_rename_lookups="$(grep "$cpu_name.rename.int_rename_lookups" $2 | grep -Eo '[0-9]+')"
 rename_RenamedLookups="$(grep "$cpu_name.rename.RenameLookups" $2 | grep -Eo '[0-9]+')"
 fp_rename_lookups="$(grep "$cpu_name.rename.fp_rename_lookups" $2 | grep -Eo '[0-9]+')"
+fp_rename_reads="$(grep "$cpu_name.rename.fp_rename_lookups" $2 | grep -Eo '[0-9]+')"
+rob_writes="$(grep "$cpu_name.rob.rob_writes" $2 | grep -Eo '[0-9]+')"
 
 write_misses="$(grep "$cpu_name.dcache.WriteReq_misses::total" $2 | grep -Eo '[0-9]+')"
 write_accesses="$(grep "$cpu_name.dcache.WriteReq_accesses::total" $2 | grep -Eo '[0-9]+')"
@@ -119,6 +121,14 @@ xmlstarlet edit -L -u "/component/component/component/stat[@name='fpu_accesses']
 echo "system.core0.rename_reads -> $((int_rename_lookups))"
 xmlstarlet edit -L -u "/component/component/component/stat[@name='rename_reads']/@value" -v $((int_rename_lookups)) $1
 
+echo "ROB_writes -> $((rob_writes))"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='ROB_writes']/@value" -v $((rob_writes)) $1
+
+echo "fp_rename_reads -> $((fp_rename_reads))"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='fp_rename_reads']/@value" -v $((fp_rename_reads)) $1
+
+
+
 if [ ${#rename_RenamedLookups} -gt 0 ];
 then
 
@@ -136,8 +146,8 @@ then
 	fi
 fi
 
-echo "system.core0.cdb_alu_accesses -> $((ialu_accesses))"
-xmlstarlet edit -L -u "/component/component/component/stat[@name='cdb_alu_accesses']/@value" -v $((ialu_accesses)) $1
-echo "system.core0.cdb_fpu_accesses -> $((fpu_accesses))"
-xmlstarlet edit -L -u "/component/component/component/stat[@name='cdb_fpu_accesses']/@value" -v $((fpu_accesses)) $1
+echo "system.core0.cdb_alu_accesses -> 0"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='cdb_alu_accesses']/@value" -v '0' $1
+echo "system.core0.cdb_fpu_accesses -> 0"
+xmlstarlet edit -L -u "/component/component/component/stat[@name='cdb_fpu_accesses']/@value" -v '0' $1
 
