@@ -9,7 +9,7 @@
 
 cpu_name='system.cpu'
 
-committed_fp_instructions="$(grep "$cpu_name.commit.fp_insts" $2 | grep -Eo '[0-9]+')"
+committed_fp_instructions="$(grep "$cpu_name.commit.fp_insts::total" $2 | grep -Eo '[0-9]+')"
 rename_reads="$(grep "$cpu_name.rename.int_rename_lookups" $2 | grep -Eo '[0-9]+')"
 btb_write_accesses="$(grep "$cpu_name.commit.branches" $2 | grep -Eo '[0-9]+')"
 rename_RenamedOperands="$(grep "$cpu_name.rename.RenamedOperands" $2 | grep -Eo '[0-9]+')"

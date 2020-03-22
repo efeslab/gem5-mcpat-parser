@@ -30,7 +30,7 @@
  */
 %error-verbose
 %{
-#include <lib/util.h>
+#include "lib/utils.h"
 #include "lib/handle_options.h"
 
 int ERROR = 0;
@@ -559,7 +559,7 @@ void xmlParser() throw()
 		                                        mcpat_stats->WriteReq_misses[2]);
 
     /* L30 CACHE */    
-    /*xml_node<> *l3_node = l2_node->next_sibling();
+    xml_node<> *l3_node = l2_node->next_sibling();
     checkNode(l3_node, "system.L30", "L30");
     findAndSetValue(l3_node, "param", "L3_config", make_tuple(8,mcpat_param->L3_config[0],
 							      mcpat_param->L3_config[1],
@@ -576,10 +576,10 @@ void xmlParser() throw()
 		       mcpat_stats->Writeback_accesses[3] + mcpat_stats->WriteReq_access[3]);
     findAndSetIntValue(l3_node, "stat", "read_misses", mcpat_stats->overall_misses[3]-mcpat_stats->WriteReq_misses[3]);
     findAndSetIntValue(l3_node, "stat", "write_misses", mcpat_stats->overall_misses[3]-mcpat_stats->Writeback_misses_l3 +
-		                                        mcpat_stats->WriteReq_misses[3]);*/
+		                                        mcpat_stats->WriteReq_misses[3]);
 
     /* TODO: NoC */
-    xml_node<> *noc_node = l2_node->next_sibling();
+    xml_node<> *noc_node = l3_node->next_sibling();
     checkNode(noc_node, "system.NoC0", "noc0");
     
     /* Main memory */

@@ -1,0 +1,10 @@
+configuration.xml
+parser.tab.c
+parser.tab.h
+lex.yy.c
+stats.txt
+results.txt
+config.ini
+*.swp
+*.o
+gem5-mcpat-parser

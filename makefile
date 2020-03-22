@@ -3,14 +3,15 @@
 
 COMP=g++
 BIN=gem5-mcpat-parser
-FLAGS=-lfl -ly -std=c++11 -O3
+FLAGS=-lfl -ly -std=c++11 -O3 -g
 PARS=parser
+OUTPUT=lex.yy.c parser.tab.c parser.tab.h configuration.xml
 .PHONY: compile clean
 
 compile: parser.l parser.y
-	#flex $(PARS).l
-	#bison -o $(PARS).tab.c $(PARS).y -yd
+	flex $(PARS).l
+	bison -o $(PARS).tab.c $(PARS).y -yd
 	$(COMP) -o $(BIN) lex.yy.c $(PARS).tab.c $(FLAGS)
 
 clean:
-	-rm $(OUTPUT) $(BIN)
+	rm -rf $(OUTPUT) $(BIN)
