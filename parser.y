@@ -196,7 +196,7 @@ config:
 	|	MM_CHNLS EQ NUM { mcpat_param->memory_channels_per_mc = $3; }
 	|	MM_RANKS EQ NUM { mcpat_param->number_ranks = $3; }
 	|	MM_BSIZE EQ NUM { mcpat_param->block_size = $3; }
-		
+  ;
 		
 stats:		DECODINSTS WS NUM { mcpat_stats->total_instructions = $3; }
 	|	BRANCHPRED WS NUM { mcpat_stats->branch_instructions = $3; }
@@ -218,19 +218,19 @@ stats:		DECODINSTS WS NUM { mcpat_stats->total_instructions = $3; }
 	|	IQ_INT_R WS NUM { mcpat_stats->inst_window_reads = $3; }
 	|	IQ_INT_W WS NUM { mcpat_stats->inst_window_writes = $3; }
 	|	IQ_INT_WA WS NUM { mcpat_stats->inst_window_wakeup_accesses = $3; }
-	|       IQ_FP_QR WS NUM { mcpat_stats->fp_inst_window_reads = $3; }
+	| IQ_FP_QR WS NUM { mcpat_stats->fp_inst_window_reads = $3; }
 	|	IQ_FP_QW WS NUM { mcpat_stats->fp_inst_window_writes = $3; }
 	|	IQ_FP_QWA WS NUM { mcpat_stats->fp_inst_window_wakeup_accesses = $3; }
 	|	INT_RG_R WS NUM { mcpat_stats->int_regfile_reads = $3; }
-        |	INT_RG_W WS NUM { mcpat_stats->int_regfile_writes = $3; }
+  |	INT_RG_W WS NUM { mcpat_stats->int_regfile_writes = $3; }
 	|	FP_RG_R WS NUM { mcpat_stats->float_regfile_reads = $3; }
 	|	FP_RG_W WS NUM { mcpat_stats->float_regfile_writes = $3; }
 	|	COMCALLS WS NUM { mcpat_stats->function_calls = $3; }
 	|	INTDIV WS NUM { mcpat_stats->IntDiv = $3; }
-        |	INTMULT WS NUM { mcpat_stats->IntMult = $3; }
+  |	INTMULT WS NUM { mcpat_stats->IntMult = $3; }
 	|	INT_ALU_ACC WS NUM { mcpat_stats->ialu_accesses = $3; }
 	|	FP_ALU_ACC WS NUM { mcpat_stats->fpu_accesses = $3;}
-	|       BTBLKUP WS NUM { mcpat_stats->btb_read_accesses = $3; }
+	| BTBLKUP WS NUM { mcpat_stats->btb_read_accesses = $3; }
 	|	BTBUP WS NUM { mcpat_stats->btb_write_accesses = $3; }
 	|	DTB_MISS WS NUM { mcpat_stats->dtlb_total_misses = $3; }
 	|	DTB_ACC WS NUM { mcpat_stats->dtlb_total_accesses = $3; }
@@ -559,6 +559,7 @@ void xmlParser() throw()
 		                                        mcpat_stats->WriteReq_misses[2]);
 
     /* L30 CACHE */    
+    /*
     xml_node<> *l3_node = l2_node->next_sibling();
     checkNode(l3_node, "system.L30", "L30");
     findAndSetValue(l3_node, "param", "L3_config", make_tuple(8,mcpat_param->L3_config[0],
@@ -577,9 +578,10 @@ void xmlParser() throw()
     findAndSetIntValue(l3_node, "stat", "read_misses", mcpat_stats->overall_misses[3]-mcpat_stats->WriteReq_misses[3]);
     findAndSetIntValue(l3_node, "stat", "write_misses", mcpat_stats->overall_misses[3]-mcpat_stats->Writeback_misses_l3 +
 		                                        mcpat_stats->WriteReq_misses[3]);
+                                            */
 
     /* TODO: NoC */
-    xml_node<> *noc_node = l3_node->next_sibling();
+    xml_node<> *noc_node = l2_node->next_sibling();
     checkNode(noc_node, "system.NoC0", "noc0");
     
     /* Main memory */
@@ -655,10 +657,19 @@ void display_errors()
     }
 }
 
+#ifdef YYDEBUG
+extern int yydebug;
+#endif
+
+extern void initialize_scanner();
+
 /////////////////////////////////
 // main function		      
 int main(int argc, char *argv[])
 {
+#ifdef YYDEBUG
+    yydebug = 1;
+#endif
     printf(BLD "gem5-mcpat-parser 2017\n");
 
     // check options
@@ -690,6 +701,7 @@ int main(int argc, char *argv[])
     
     // to clean yyin
     yyrestart(yyin);
+    initialize_scanner();
     yyin = stats_fptr;
     yylineno = 0;
     yyparse();

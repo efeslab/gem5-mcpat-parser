@@ -933,3 +933,7 @@ I1                  "system.cpu.icache."
  * PREV_STATE allows to return to the previous state. It is used when
  * a tag like [something] contains more than one parameter to catch
  **/
+
+void initialize_scanner(void) {
+  BEGIN(INITIAL);
+}
