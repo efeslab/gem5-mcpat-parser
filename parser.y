@@ -67,12 +67,12 @@ void yyrestart(FILE *yyin);
 %token L3SIZE L3ASSOC L3MSHRS HLL3 RLL3 WBL3 L3BSIZE
 %token MULTALU_LAT DIVALU_LAT			
     /* TOKENS STATS */
-%token DECODINSTS BRANCHPRED BRANCHERR IEWLOAD IEWSTORE	CINT CFP IPC NCYCLES
+%token DECODINSTS BRANCHPRED BRANCHERR IEWLOAD IEWSTORE COPS CINT CFP IPC NCYCLES
 %token ICYCLES ROBREADS ROBWRITES RE_INT_LKUP RE_INT_OP RE_FP_LKUP RE_FP_OP
 %token IQ_INT_R IQ_INT_W IQ_INT_WA IQ_FP_QR IQ_FP_QW IQ_FP_QWA INT_RG_R INT_RG_W
 %token FP_RG_R FP_RG_W COMCALLS INTDIV INTMULT INT_ALU_ACC FP_ALU_ACC
 %token BTBLKUP BTBUP
-%token DTB_MISS DTB_ACC	ITB_MISS ITB_ACC
+%token DTB_RDMISS DTB_RDACC	DTB_WRMISS DTB_WRACC ITB_MISS ITB_ACC
 %token D1_ACC D1_MISS D1_WRACC D1_WRBACK D1_WRMISS D1_WRHITS
 %token I1_ACC I1_MISS I1_WRACC I1_WRBACK I1_WRMISS I1_WRHITS
 %token L2_ACC L2_MISS L2_WRACC L2_WRMISS L2_WRBACK L2_WRBMISS
@@ -200,9 +200,10 @@ config:
 		
 stats:		DECODINSTS WS NUM { mcpat_stats->total_instructions = $3; }
 	|	BRANCHPRED WS NUM { mcpat_stats->branch_instructions = $3; }
-	|	BRANCHERR WS NUM { mcpat_stats->branch_mispredictions = $3; }
+	|	BRANCHERR WS NUM { mcpat_stats->branch_mispredictions = $3; mcpat_stats->btb_write_accesses = $3; }
 	|	IEWLOAD WS NUM { mcpat_stats->load_instructions = $3; }
 	|	IEWSTORE WS NUM { mcpat_stats->store_instructions = $3; }
+  | COPS WS NUM { mcpat_stats->committed_instructions = $3; }
 	|	CINT WS NUM { mcpat_stats->committed_int_instructions = $3; }
 	|	CFP WS NUM { mcpat_stats->committed_fp_instructions = $3; }
 	|	IPC WS FLOAT { mcpat_stats->pipeline_duty_cycle = $3; }
@@ -228,26 +229,27 @@ stats:		DECODINSTS WS NUM { mcpat_stats->total_instructions = $3; }
 	|	COMCALLS WS NUM { mcpat_stats->function_calls = $3; }
 	|	INTDIV WS NUM { mcpat_stats->IntDiv = $3; }
   |	INTMULT WS NUM { mcpat_stats->IntMult = $3; }
-	|	INT_ALU_ACC WS NUM { mcpat_stats->ialu_accesses = $3; }
-	|	FP_ALU_ACC WS NUM { mcpat_stats->fpu_accesses = $3;}
+	|	INT_ALU_ACC WS NUM { mcpat_stats->ialu_accesses = $3; mcpat_stats->int_instructions = $3; }
+	|	FP_ALU_ACC WS NUM { mcpat_stats->fpu_accesses = $3; mcpat_stats->fp_instructions = $3; }
 	| BTBLKUP WS NUM { mcpat_stats->btb_read_accesses = $3; }
-	|	BTBUP WS NUM { mcpat_stats->btb_write_accesses = $3; }
-	|	DTB_MISS WS NUM { mcpat_stats->dtlb_total_misses = $3; }
-	|	DTB_ACC WS NUM { mcpat_stats->dtlb_total_accesses = $3; }
+	|	DTB_RDMISS WS NUM { mcpat_stats->dtlb_read_misses = $3; }
+	|	DTB_WRMISS WS NUM { mcpat_stats->dtlb_write_misses = $3; }
+	|	DTB_RDACC WS NUM { mcpat_stats->dtlb_read_accesses = $3; }
+	|	DTB_WRACC WS NUM { mcpat_stats->dtlb_write_accesses = $3; }
 	|	ITB_MISS WS NUM { mcpat_stats->itlb_total_misses = $3; }
 	|	ITB_ACC WS NUM { mcpat_stats->itlb_total_accesses = $3; }
-	|	D1_ACC WS NUM { mcpat_stats->overall_access[0] = $3; }
-	|	D1_MISS WS NUM { mcpat_stats->overall_misses[0] = $3; }
-	|	D1_WRACC WS NUM { mcpat_stats->WriteReq_access[0] = $3; }
-	|	D1_WRMISS WS NUM { mcpat_stats->WriteReq_misses[0] = $3; }
-	|	D1_WRHITS WS NUM { mcpat_stats->WriteReq_hits[0] = $3; }
-	|	D1_WRBACK WS NUM { mcpat_stats->Writeback_accesses[0] = $3; }
-	|	I1_ACC WS NUM { mcpat_stats->overall_access[1] = $3; }
-	|	I1_MISS WS NUM { mcpat_stats->overall_misses[1] = $3; }
-	|	I1_WRACC WS NUM { mcpat_stats->WriteReq_access[1] = $3; }
-	|	I1_WRMISS WS NUM { mcpat_stats->WriteReq_misses[1] = $3; }
-	|	I1_WRHITS WS NUM { mcpat_stats->WriteReq_hits[1] = $3; }
-	|	I1_WRBACK WS NUM { mcpat_stats->Writeback_accesses[1] = $3; }
+	|	D1_ACC WS NUM { mcpat_stats->overall_access[1] = $3; }
+	|	D1_MISS WS NUM { mcpat_stats->overall_misses[1] = $3; }
+	|	D1_WRACC WS NUM { mcpat_stats->WriteReq_access[1] = $3; }
+	|	D1_WRMISS WS NUM { mcpat_stats->WriteReq_misses[1] = $3; }
+	|	D1_WRHITS WS NUM { mcpat_stats->WriteReq_hits[1] = $3; }
+	|	D1_WRBACK WS NUM { mcpat_stats->Writeback_accesses[1] = $3; }
+	|	I1_ACC WS NUM { mcpat_stats->overall_access[0] = $3; }
+	|	I1_MISS WS NUM { mcpat_stats->overall_misses[0] = $3; }
+	|	I1_WRACC WS NUM { mcpat_stats->WriteReq_access[0] = $3; }
+	|	I1_WRMISS WS NUM { mcpat_stats->WriteReq_misses[0] = $3; }
+	|	I1_WRHITS WS NUM { mcpat_stats->WriteReq_hits[0] = $3; }
+	|	I1_WRBACK WS NUM { mcpat_stats->Writeback_accesses[0] = $3; }
 	|	L2_ACC WS NUM { mcpat_stats->overall_access[2] = $3; }
 	|	L2_MISS WS NUM { mcpat_stats->overall_misses[2] = $3; }
 	|	L2_WRACC WS NUM { mcpat_stats->WriteReq_access[2] = $3; }
@@ -388,6 +390,7 @@ void xmlParser() throw()
     findAndSetIntValue(sys_node, "param", "number_of_L2Directories", mcpat_param->l2_avail);
     findAndSetIntValue(sys_node, "param", "Private_L2", mcpat_param->l2_avail);
     findAndSetIntValue(sys_node, "param", "number_of_L2s", mcpat_param->l2_avail);
+
     findAndSetIntValue(sys_node, "param", "number_of_L3s", mcpat_param->l3_avail);
     findAndSetIntValue(sys_node, "param", "homogeneous_L3s", mcpat_param->l3_avail);
     if (mcpat_param->l3_avail) {
@@ -431,6 +434,9 @@ void xmlParser() throw()
     findAndSetIntValue(core_node, "stat", "branch_mispredictions", mcpat_stats->branch_mispredictions);
     findAndSetIntValue(core_node, "stat", "load_instructions", mcpat_stats->load_instructions);
     findAndSetIntValue(core_node, "stat", "store_instructions", mcpat_stats->store_instructions - mcpat_stats->load_instructions);
+    findAndSetIntValue(core_node, "stat", "int_instructions", mcpat_stats->int_instructions);
+    findAndSetIntValue(core_node, "stat", "fp_instructions", mcpat_stats->fp_instructions);
+    findAndSetIntValue(core_node, "stat", "committed_instructions", mcpat_stats->committed_instructions);
     findAndSetIntValue(core_node, "stat", "committed_int_instructions", mcpat_stats->committed_int_instructions);
     findAndSetIntValue(core_node, "stat", "committed_fp_instructions", mcpat_stats->committed_fp_instructions);
     findAndSetFloatValue(core_node, "stat", "pipeline_duty_cycle", mcpat_stats->pipeline_duty_cycle);
@@ -452,6 +458,7 @@ void xmlParser() throw()
     findAndSetIntValue(core_node, "stat", "int_regfile_reads", mcpat_stats->int_regfile_reads);
     findAndSetIntValue(core_node, "stat", "int_regfile_writes", mcpat_stats->int_regfile_writes);
     findAndSetIntValue(core_node, "stat", "float_regfile_reads", mcpat_stats->float_regfile_reads);
+    findAndSetIntValue(core_node, "stat", "float_regfile_writes", mcpat_stats->float_regfile_writes);
     findAndSetIntValue(core_node, "stat", "function_calls", mcpat_stats->function_calls);
     mcpat_stats->mul_accesses = mcpat_stats->IntDiv*mcpat_param->lat_IntDiv +
 	                        mcpat_stats->IntMult*mcpat_param->lat_IntMult;
@@ -501,8 +508,8 @@ void xmlParser() throw()
     xml_node<> *dtlb_node = icache_node->next_sibling();
     checkNode(dtlb_node, "system.core0.dtlb", "dtlb");
     findAndSetIntValue(dtlb_node, "param", "number_entries", mcpat_param->number_entries_dtlb);
-    findAndSetIntValue(dtlb_node, "stat", "total_accesses", mcpat_stats->dtlb_total_accesses);
-    findAndSetIntValue(dtlb_node, "stat", "total_misses", mcpat_stats->dtlb_total_misses);
+    findAndSetIntValue(dtlb_node, "stat", "total_accesses", mcpat_stats->dtlb_read_accesses+mcpat_stats->dtlb_write_accesses);
+    findAndSetIntValue(dtlb_node, "stat", "total_misses", mcpat_stats->dtlb_read_misses+mcpat_stats->dtlb_write_misses);
     
     /* DCACHE */
     xml_node<> *dcache_node = dtlb_node->next_sibling();

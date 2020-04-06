@@ -100,8 +100,8 @@ CPU                 "system.cpu."
 SYS                 "system."
 SL2                 "system.l2."
 SL3                 "system.l3."			
-DTB                 "system.cpu.dtb_walker_cache.tags."
-ITB                 "system.cpu.itb_walker_cache.tags."
+DTB                 "system.cpu.dtb."
+ITB                 "system.cpu.itb."
 D1                  "system.cpu.dcache."
 I1                  "system.cpu.icache."
 %%			
@@ -124,7 +124,7 @@ I1                  "system.cpu.icache."
 
     /* ISA type. QUITE MESSY... */
 
-<INITIAL>"[system.cpu.isa]\n" {
+<INITIAL>"[system.cpu.isa]\n"|"[system.cpu.isa0]\n" {
         BEGIN(ISA);
 }
 
@@ -549,22 +549,27 @@ I1                  "system.cpu.icache."
     return BRANCHERR;
 }
 
-<INITIAL>{CPU}"iew.iewExecLoadInsts"|{CPU}"num_load_insts" {
+<INITIAL>{CPU}"iew.iewExecLoadInsts"|{CPU}"iew.iewExecLoadInsts::total"|{CPU}"num_load_insts" {
     BEGIN(DELIM);
     return IEWLOAD;
 }
 
-<INITIAL>{CPU}"iew.exec_refs"|{CPU}"num_store_insts" {
+<INITIAL>{CPU}"iew.exec_refs"|{CPU}"iew.exec_refs::total"|{CPU}"num_store_insts" {
     BEGIN(DELIM);
     return IEWSTORE;
 }
 
-<INITIAL>{CPU}"commit.int_insts" {
+<INITIAL>{CPU}"commit.committedOps"|{CPU}"commit.committedOps::total" {
+    BEGIN(DELIM);
+    return COPS;
+}
+
+<INITIAL>{CPU}"commit.int_insts"|{CPU}"commit.int_insts::total" {
     BEGIN(DELIM);
     return CINT;
 }
 
-<INITIAL>{CPU}"commit.fp_insts" {
+<INITIAL>{CPU}"commit.fp_insts"|{CPU}"commit.fp_insts::total" {
     BEGIN(DELIM);
     return CFP;
 }
@@ -664,7 +669,7 @@ I1                  "system.cpu.icache."
     return FP_RG_W;
 }
 
-<INITIAL>{CPU}"commit.function_calls" {
+<INITIAL>{CPU}"commit.function_calls"|{CPU}"commit.function_calls::total" {
     BEGIN(DELIM);
     return COMCALLS;
 }
@@ -704,7 +709,7 @@ I1                  "system.cpu.icache."
 }
 
     /* BTB */
-<INITIAL>{CPU}"branchPred.BTBLookups" {
+<INITIAL>{CPU}"branchPred.lookups" {
     BEGIN(DELIM);
     return BTBLKUP;
 }
@@ -715,22 +720,32 @@ I1                  "system.cpu.icache."
 }
 
     /* TLBs */
-<INITIAL>{DTB}"replacements" {
+<INITIAL>{DTB}"rdMisses" {
     BEGIN(DELIM);
-    return DTB_MISS;
+    return DTB_RDMISS;
 }
 
-<INITIAL>{DTB}"data_accesses" {
+<INITIAL>{DTB}"wrMisses" {
     BEGIN(DELIM);
-    return DTB_ACC;
+    return DTB_WRMISS;
 }
 
-<INITIAL>{ITB}"replacements" {
+<INITIAL>{DTB}"rdAccesses" {
+    BEGIN(DELIM);
+    return DTB_RDACC;
+}
+
+<INITIAL>{DTB}"wrAccesses" {
+    BEGIN(DELIM);
+    return DTB_WRACC;
+}
+
+<INITIAL>{ITB}"rdMisses" {
     BEGIN(DELIM);
     return ITB_MISS;
 }
 
-<INITIAL>{ITB}"data_accesses" {
+<INITIAL>{ITB}"rdAccesses" {
     BEGIN(DELIM);
     return ITB_ACC;
 }

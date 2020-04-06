@@ -139,6 +139,9 @@ struct t_mcpat_stats {
     int branch_mispredictions = 0;
     int load_instructions = 0;
     int store_instructions = 0;
+    int int_instructions = 0;
+    int fp_instructions = 0;
+    int committed_instructions = 0;
     int committed_int_instructions = 0;
     int committed_fp_instructions = 0;
     double pipeline_duty_cycle = 0.0;
@@ -170,8 +173,10 @@ struct t_mcpat_stats {
     int btb_read_accesses = 0;
     int btb_write_accesses = 0;
     /* tlb L1 */
-    int dtlb_total_accesses = 0;
-    int dtlb_total_misses = 0;
+    int dtlb_read_accesses = 0;
+    int dtlb_write_accesses = 0;
+    int dtlb_read_misses = 0;
+    int dtlb_write_misses = 0;
     int itlb_total_accesses = 0;
     int itlb_total_misses = 0;
 
