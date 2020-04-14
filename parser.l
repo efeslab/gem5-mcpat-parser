@@ -604,7 +604,7 @@ I1                  "system.cpu.icache."
     return RE_INT_LKUP;
 }
 
-<INITIAL>{CPU}"rename.int_rename_operands" {
+<INITIAL>{CPU}"rename.int_renamed_operands" {
     BEGIN(DELIM);
     return RE_INT_OP;
 }
@@ -614,7 +614,7 @@ I1                  "system.cpu.icache."
     return RE_FP_LKUP;
 }
 
-<INITIAL>{CPU}"rename.fp_rename_operands" {
+<INITIAL>{CPU}"rename.fp_renamed_operands" {
     BEGIN(DELIM);
     return RE_FP_OP;
 }
@@ -781,6 +781,11 @@ I1                  "system.cpu.icache."
     return D1_WRHITS;
 }
 
+<INITIAL>{D1}"replacements" {
+    BEGIN(DELIM);
+    return D1_REPLACE;
+}
+
     /* ICACHE */
 <INITIAL>{I1}"overall_accesses::total" {
     BEGIN(DELIM);
@@ -812,35 +817,40 @@ I1                  "system.cpu.icache."
     return I1_WRHITS;
 }
 
+<INITIAL>{I1}"replacements" {
+    BEGIN(DELIM);
+    return I1_REPLACE;
+}
+
     /* L2 CACHE */
 <INITIAL>{SL2}"overall_accesses::total" {
     BEGIN(DELIM);
     return L2_ACC;
 }
 
-<INITIAL>{SL2}"overall_misses::total" {
+<INITIAL>{SL2}"read_misses::total" {
     BEGIN(DELIM);
-    return L2_MISS;
+    return L2_RDMISS;
 }
 
-<INITIAL>{SL2}"WriteReq_accesses::total" {
+<INITIAL>{SL2}"read_hits::total" {
     BEGIN(DELIM);
-    return L2_WRACC;
+    return L2_RDHIT;
 }
 
-<INITIAL>{SL2}"WriteReq_misses::total" {
+<INITIAL>{SL2}"write_misses::total" {
     BEGIN(DELIM);
     return L2_WRMISS;
 }
 
-<INITIAL>{SL2}"Writeback_accesses::total" {
+<INITIAL>{SL2}"write_hits::total" {
     BEGIN(DELIM);
-    return L2_WRBACK;
+    return L2_WRHIT;
 }
 
-<INITIAL>{SL2}"Writeback_misses::total" {
+<INITIAL>{SL2}"replacements" {
     BEGIN(DELIM);
-    return L2_WRBMISS;
+    return L2_REPLACE;
 }
 
     /* L3 CACHE */

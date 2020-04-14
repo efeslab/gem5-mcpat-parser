@@ -73,9 +73,9 @@ void yyrestart(FILE *yyin);
 %token FP_RG_R FP_RG_W COMCALLS INTDIV INTMULT INT_ALU_ACC FP_ALU_ACC
 %token BTBLKUP BTBUP
 %token DTB_RDMISS DTB_RDACC	DTB_WRMISS DTB_WRACC ITB_MISS ITB_ACC
-%token D1_ACC D1_MISS D1_WRACC D1_WRBACK D1_WRMISS D1_WRHITS
-%token I1_ACC I1_MISS I1_WRACC I1_WRBACK I1_WRMISS I1_WRHITS
-%token L2_ACC L2_MISS L2_WRACC L2_WRMISS L2_WRBACK L2_WRBMISS
+%token D1_ACC D1_MISS D1_WRACC D1_WRBACK D1_WRMISS D1_WRHITS D1_REPLACE
+%token I1_ACC I1_MISS I1_WRACC I1_WRBACK I1_WRMISS I1_WRHITS I1_REPLACE
+%token L2_ACC L2_MISS L2_WRACC L2_WRMISS L2_WRHIT L2_WRBACK L2_WRBMISS L2_HIT L2_RDMISS L2_RDHIT L2_REPLACE
 %token L3_ACC L3_MISS L3_WRACC L3_WRMISS L3_WRBACK L3_WRBMISS			
 %token MM_CHNLS MM_RANKS MM_BSIZE MM_NREADS MM_NWRITES
 %token <t_int> NUM
@@ -244,16 +244,21 @@ stats:		DECODINSTS WS NUM { mcpat_stats->total_instructions = $3; }
 	|	D1_WRMISS WS NUM { mcpat_stats->WriteReq_misses[1] = $3; }
 	|	D1_WRHITS WS NUM { mcpat_stats->WriteReq_hits[1] = $3; }
 	|	D1_WRBACK WS NUM { mcpat_stats->Writeback_accesses[1] = $3; }
+  | D1_REPLACE WS NUM { mcpat_stats->d1_replacements = $3; }
 	|	I1_ACC WS NUM { mcpat_stats->overall_access[0] = $3; }
 	|	I1_MISS WS NUM { mcpat_stats->overall_misses[0] = $3; }
 	|	I1_WRACC WS NUM { mcpat_stats->WriteReq_access[0] = $3; }
 	|	I1_WRMISS WS NUM { mcpat_stats->WriteReq_misses[0] = $3; }
 	|	I1_WRHITS WS NUM { mcpat_stats->WriteReq_hits[0] = $3; }
 	|	I1_WRBACK WS NUM { mcpat_stats->Writeback_accesses[0] = $3; }
+  | I1_REPLACE WS NUM { mcpat_stats->i1_replacements = $3; }
 	|	L2_ACC WS NUM { mcpat_stats->overall_access[2] = $3; }
-	|	L2_MISS WS NUM { mcpat_stats->overall_misses[2] = $3; }
+  | L2_RDMISS WS NUM { mcpat_stats->l2_read_misses = $3; }
+  | L2_RDHIT WS NUM { mcpat_stats->l2_read_hits = $3; }
 	|	L2_WRACC WS NUM { mcpat_stats->WriteReq_access[2] = $3; }
-	|	L2_WRMISS WS NUM { mcpat_stats->WriteReq_misses[2] = $3; }
+	|	L2_WRMISS WS NUM { mcpat_stats->l2_write_misses = $3; }
+  | L2_WRHIT WS NUM { mcpat_stats->l2_write_hits = $3; }
+  | L2_REPLACE WS NUM { mcpat_stats->l2_replacements = $3; }
 	|	L2_WRBACK WS NUM { mcpat_stats->Writeback_accesses[2] = $3; }
 	|	L2_WRBMISS WS NUM { mcpat_stats->Writeback_misses = $3; }
 	|	L3_ACC WS NUM { mcpat_stats->overall_access[3] = $3; }
@@ -503,6 +508,7 @@ void xmlParser() throw()
 								     mcpat_param->icache_buffer_sizes[2],0));
     findAndSetIntValue(icache_node, "stat", "read_accesses", mcpat_stats->overall_access[0]-mcpat_stats->WriteReq_access[0]);
     findAndSetIntValue(icache_node, "stat", "read_misses", mcpat_stats->overall_misses[0]-mcpat_stats->WriteReq_misses[0]);
+    findAndSetIntValue(icache_node, "stat", "conflicts", mcpat_stats->i1_replacements);
     
     /* DTLB */
     xml_node<> *dtlb_node = icache_node->next_sibling();
@@ -527,6 +533,7 @@ void xmlParser() throw()
     findAndSetIntValue(dcache_node, "stat", "write_accesses", mcpat_stats->WriteReq_access[1]-mcpat_stats->Writeback_accesses[1]);
     findAndSetIntValue(dcache_node, "stat", "read_misses", mcpat_stats->overall_misses[1]-mcpat_stats->WriteReq_misses[1]);
     findAndSetIntValue(dcache_node, "stat", "write_misses", mcpat_stats->WriteReq_access[1]-mcpat_stats->WriteReq_hits[1]);
+    findAndSetIntValue(dcache_node, "stat", "conflicts", mcpat_stats->d1_replacements);
     
     /* BTB: param tag in the middle that is why double next_sibling() */
     xml_node<> *btb_node = dcache_node->next_sibling()->next_sibling();
@@ -558,12 +565,11 @@ void xmlParser() throw()
 								     mcpat_param->L2_buffer_sizes[2],
 								     mcpat_param->L2_buffer_sizes[3]));
     findAndSetIntValue(l2_node, "param", "clockrate", mcpat_param->clock_rate);
-    findAndSetIntValue(l2_node, "stat", "read_accesses", mcpat_stats->overall_access[2]-mcpat_stats->WriteReq_access[2]);
-    findAndSetIntValue(l2_node, "stat", "write_accesses", mcpat_stats->overall_access[2] +
-		       mcpat_stats->Writeback_accesses[2] + mcpat_stats->WriteReq_access[2]);
-    findAndSetIntValue(l2_node, "stat", "read_misses", mcpat_stats->overall_misses[2]-mcpat_stats->WriteReq_misses[2]);
-    findAndSetIntValue(l2_node, "stat", "write_misses", mcpat_stats->overall_misses[2]-mcpat_stats->Writeback_misses +
-		                                        mcpat_stats->WriteReq_misses[2]);
+    findAndSetIntValue(l2_node, "stat", "read_accesses", mcpat_stats->l2_read_misses + mcpat_stats->l2_read_hits);
+    findAndSetIntValue(l2_node, "stat", "write_accesses", mcpat_stats->l2_write_misses + mcpat_stats->l2_write_hits);
+    findAndSetIntValue(l2_node, "stat", "read_misses", mcpat_stats->l2_read_misses);
+    findAndSetIntValue(l2_node, "stat", "write_misses", mcpat_stats->l2_write_misses);
+    findAndSetIntValue(l2_node, "stat", "conflicts", mcpat_stats->l2_replacements);
 
     /* L30 CACHE */    
     /*
@@ -595,9 +601,11 @@ void xmlParser() throw()
     xml_node<> *mc_node = noc_node->next_sibling();
     checkNode(mc_node, "system.mc", "mc");
     findAndSetIntValue(mc_node, "param", "mc_clock", mcpat_param->clock_rate); 
-    findAndSetIntValue(mc_node, "param", "block_size", mcpat_param->block_size);
-    findAndSetIntValue(mc_node, "param", "memory_channels_per_mc", mcpat_param->memory_channels_per_mc);
-    findAndSetIntValue(mc_node, "param", "number_ranks", mcpat_param->number_ranks);
+    /* this is hard coded */
+    //findAndSetIntValue(mc_node, "param", "block_size", mcpat_param->block_size);
+    /* we don't care about memory, ignore these entries */
+    //findAndSetIntValue(mc_node, "param", "memory_channels_per_mc", mcpat_param->memory_channels_per_mc);
+    //findAndSetIntValue(mc_node, "param", "number_ranks", mcpat_param->number_ranks);
 
     findAndSetIntValue(mc_node, "stat", "memory_accesses", mcpat_stats->memory_reads + mcpat_stats->memory_writes);
     findAndSetIntValue(mc_node, "stat", "memory_reads", mcpat_stats->memory_reads);
