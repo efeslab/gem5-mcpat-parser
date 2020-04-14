@@ -9,8 +9,8 @@ OUTPUT=lex.yy.c parser.tab.c parser.tab.h configuration.xml
 .PHONY: compile clean
 
 compile: parser.l parser.y
-	flex -d $(PARS).l
-	bison -o $(PARS).tab.c $(PARS).y -yd --debug
+	flex $(PARS).l
+	bison -o $(PARS).tab.c $(PARS).y -yd
 	$(COMP) -o $(BIN) lex.yy.c $(PARS).tab.c $(FLAGS)
 
 clean:

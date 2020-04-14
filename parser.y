@@ -672,19 +672,12 @@ void display_errors()
     }
 }
 
-#ifdef YYDEBUG
-extern int yydebug;
-#endif
-
 extern void initialize_scanner();
 
 /////////////////////////////////
 // main function		      
 int main(int argc, char *argv[])
 {
-#ifdef YYDEBUG
-    yydebug = 1;
-#endif
     printf(BLD "gem5-mcpat-parser 2017\n");
 
     // check options
