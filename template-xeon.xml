@@ -28,6 +28,7 @@
 		<param name="virtual_address_width" value="64"/>
 		<param name="physical_address_width" value="52"/>
 		<param name="virtual_memory_page_size" value="4096"/>
+    <param name="dolma" value="1"/>
 		<!-- address width determines the tag_width in Cache, LSQ and buffers in cache controller 
 			default value is machine_bits, if not set --> 
 		<stat name="total_cycles" value="100000"/>
