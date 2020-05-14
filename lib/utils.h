@@ -79,6 +79,7 @@ struct t_mcpat_params {
     int store_buffer_size = 96;
     int load_buffer_size = 48;
     int RAS_size = 64;
+    int num_threads = 1;
     /* to calculate base */
     int nbase = 0;
     int base_stages = 0;
@@ -222,6 +223,7 @@ char xml_file[80] = "template.xml";
 char out_file[80] = "configuration.xml";
 char conf_file[80] = "config.ini";
 char stats_file[80] = "stats.txt";
+bool dolma = false;
 
 // function headers
 void usage(int i);

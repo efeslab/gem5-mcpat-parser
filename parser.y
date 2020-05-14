@@ -56,6 +56,7 @@ void yyrestart(FILE *yyin);
     /* TOKENS PARAMS */			
 %token EQ WS NL BADTKN
 %token ISA_T SYSCLK M_MODE			
+%token NUM_THREADS
 %token FETCHW DECODEW ISSUEW COMMITW BASE MAXBASE BUFFERS
 %token NIQENTRIES NROBENTRIES NINTREGS NFREGS SQENTRIES LQENTRIES RASSIZE
 %token LHISTB LCTRB LPREDSIZE GPREDSIZE GCTRB CPREDSIZE	CCTRB
@@ -99,6 +100,7 @@ config:
                 ISA_T STR { mcpat_param->isa_x86 = !strcmp("X86ISA", $2); }
         |	M_MODE EQ STR { DETAILED = (!strcmp("timing", $3));}
         |	SYSCLK EQ NUM { mcpat_param->clock_rate = 1000000/$3; }
+        | NUM_THREADS EQ NUM {mcpat_param->num_threads = $3; }
 	|	FETCHW EQ NUM { mcpat_param->fetch_width = $3; }
 	|	DECODEW EQ NUM {
 	               mcpat_param->decode_width = $3;
@@ -476,6 +478,10 @@ void xmlParser() throw()
     findAndSetIntValue(core_node, "stat", "cdb_alu_accesses", mcpat_stats->ialu_accesses);
     findAndSetIntValue(core_node, "stat", "cdb_mul_accesses", mcpat_stats->mul_accesses);    
     findAndSetIntValue(core_node, "stat", "cdb_fpu_accesses", mcpat_stats->fpu_accesses);    
+
+    findAndSetIntValue(core_node, "param", "number_hardware_threads", mcpat_param->num_threads);
+    findAndSetIntValue(core_node, "param", "number_instruction_fetch_ports", mcpat_param->num_threads);
+    findAndSetIntValue(core_node, "param", "number_of_BTB", mcpat_param->num_threads);
     
     /* BRANCH PREDICTOR */
     xml_node<> *bp_node = core_node->first_node("component");

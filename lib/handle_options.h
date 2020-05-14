@@ -32,19 +32,23 @@ static struct option long_options[] = {
 	{ .name = "xmltemplate",
 	  .has_arg = required_argument,
 	  .flag = NULL,
-	  .val = 0},
+	  .val = 'x'},
 	{ .name = "config",
 	  .has_arg = required_argument,
 	  .flag = NULL,
-	  .val = 0},
+	  .val = 'c'},
 	{ .name = "stats",
 	  .has_arg = required_argument,
 	  .flag = NULL,
-	  .val = 0},
+	  .val = 's'},
 	{ .name = "output",
 	  .has_arg = required_argument,
 	  .flag = NULL,
-	  .val = 0},
+	  .val = 'o'},
+  { .name = "dolma",
+    .has_arg = no_argument,
+    .flag = NULL,
+    .val = 'd'},
 	{0, 0, 0, 0}
 };
 
@@ -58,6 +62,7 @@ void usage(int i)
 		"  -c <file>, --config=<file>: config.ini file (not JSON!)\n"
 		"  -s <file>, --stats=<file>: statistics file\n"
 		"  -o <file>, --output=<output>: XML output\n"
+    "  -d, --dolma: dolma config\n"
 		"  -h, --help: displays this message\n\n");
 	exit(i);
 }
@@ -106,7 +111,7 @@ int handle_options(int argc, char **argv)
 		int flags = 0;
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "x:c:s:o:",
+		c = getopt_long (argc, argv, "x:c:s:o:d",
 				 long_options, &option_index);
 		if (c == -1)
 		    break;
@@ -133,7 +138,8 @@ int handle_options(int argc, char **argv)
 			}
 			break;
 		case 'x': strcpy(xml_file, optarg); break;
-	        case 'o': strcpy(out_file, optarg); break;
+    case 'o': strcpy(out_file, optarg); break;
+    case 'd': printf("dolma mode enabled!\n"); dolma=true; break;
 		case '?':
 		case 'h':
 			usage(0);

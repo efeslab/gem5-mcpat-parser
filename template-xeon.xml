@@ -2,7 +2,7 @@
 <component id="root" name="root">
 	<component id="system" name="system">
 		<!--McPAT will skip the components if number is set to 0 -->
-		<param name="number_of_cores" value="2"/>
+		<param name="number_of_cores" value="1"/>
 		<param name="number_of_L1Directories" value="0"/>
 		<param name="number_of_L2Directories" value="0"/>
 		<param name="number_of_L2s" value="1"/> <!-- This number means how many L2 clusters in each cluster there can be multiple banks/ports -->

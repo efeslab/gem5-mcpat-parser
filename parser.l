@@ -59,7 +59,7 @@ int PREV_STATE = -1;
 
 %x DELIM			
 %x VALUE
-						
+
 digit   	    [0-9]
 double              {digit}+"."{digit}+			
 letter              [a-zA-Z]
@@ -507,6 +507,12 @@ I1                  "system.cpu.icache."
 <INITIAL>{c2RenameDelay} {
         BEGIN(VALUE);
         return MAXBASE;       
+}
+
+ /* this is a workaround... */
+<INITIAL>"numThreads" {
+        BEGIN(VALUE);
+        return NUM_THREADS;
 }
 
     /* MAIN MEMORY PARAMS */
