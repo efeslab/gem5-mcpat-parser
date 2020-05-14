@@ -8,3 +8,4 @@ config.ini
 *.swp
 *.o
 gem5-mcpat-parser
+__pycache__
