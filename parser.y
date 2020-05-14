@@ -408,6 +408,8 @@ void xmlParser() throw()
     findAndSetIntValue(sys_node, "stat", "idle_cycles", mcpat_stats->idle_cycles);
     findAndSetIntValue(sys_node, "stat", "busy_cycles", mcpat_stats->total_cycles - mcpat_stats->idle_cycles);
 
+    findAndSetIntValue(sys_node, "param", "dolma", dolma);
+
     /* CORE PARAMS AND STATS */
     xml_node<> *core_node = sys_node->first_node("component");
     checkNode(core_node, "system.core0", "core0");

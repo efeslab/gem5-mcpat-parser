@@ -62,7 +62,7 @@ void usage(int i)
 		"  -c <file>, --config=<file>: config.ini file (not JSON!)\n"
 		"  -s <file>, --stats=<file>: statistics file\n"
 		"  -o <file>, --output=<output>: XML output\n"
-    "  -d, --dolma: dolma config\n"
+    "  -d, --dolma: use dolma config\n"
 		"  -h, --help: displays this message\n\n");
 	exit(i);
 }
