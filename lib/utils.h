@@ -194,6 +194,11 @@ struct t_mcpat_stats {
     int Writeback_misses_l3 = 0; // l3
 
     /* this is ugly, just a workaround */
+    int l3_read_misses;
+    int l3_read_hits;
+    int l3_write_misses;
+    int l3_write_hits;
+    int l3_replacements;
     int l2_read_misses;
     int l2_read_hits;
     int l2_write_misses;

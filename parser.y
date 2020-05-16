@@ -77,7 +77,7 @@ void yyrestart(FILE *yyin);
 %token D1_ACC D1_MISS D1_WRACC D1_WRBACK D1_WRMISS D1_WRHITS D1_REPLACE
 %token I1_ACC I1_MISS I1_WRACC I1_WRBACK I1_WRMISS I1_WRHITS I1_REPLACE
 %token L2_ACC L2_MISS L2_WRACC L2_WRMISS L2_WRHIT L2_WRBACK L2_WRBMISS L2_HIT L2_RDMISS L2_RDHIT L2_REPLACE
-%token L3_ACC L3_MISS L3_WRACC L3_WRMISS L3_WRBACK L3_WRBMISS			
+%token L3_ACC L3_MISS L3_WRACC L3_WRMISS L3_WRHIT L3_WRBACK L3_WRBMISS L3_HIT L3_RDMISS L3_RDHIT L3_REPLACE
 %token MM_CHNLS MM_RANKS MM_BSIZE MM_NREADS MM_NWRITES
 %token <t_int> NUM
 %token <t_double> FLOAT
@@ -229,8 +229,8 @@ stats:		DECODINSTS WS NUM { mcpat_stats->total_instructions = $3; }
 	|	FP_RG_R WS NUM { mcpat_stats->float_regfile_reads = $3; }
 	|	FP_RG_W WS NUM { mcpat_stats->float_regfile_writes = $3; }
 	|	COMCALLS WS NUM { mcpat_stats->function_calls = $3; }
-	|	INTDIV WS NUM { mcpat_stats->IntDiv = $3; }
-  |	INTMULT WS NUM { mcpat_stats->IntMult = $3; }
+	|	INTDIV WS NUM { mcpat_stats->IntDiv += $3; /* we may have two threads, so we should add them together */ }
+  |	INTMULT WS NUM { mcpat_stats->IntMult += $3; /* we may have two threads, so we should add them together */ }
 	|	INT_ALU_ACC WS NUM { mcpat_stats->ialu_accesses = $3; mcpat_stats->int_instructions = $3; }
 	|	FP_ALU_ACC WS NUM { mcpat_stats->fpu_accesses = $3; mcpat_stats->fp_instructions = $3; }
 	| BTBLKUP WS NUM { mcpat_stats->btb_read_accesses = $3; }
@@ -266,9 +266,13 @@ stats:		DECODINSTS WS NUM { mcpat_stats->total_instructions = $3; }
 	|	L3_ACC WS NUM { mcpat_stats->overall_access[3] = $3; }
 	|	L3_MISS WS NUM { mcpat_stats->overall_misses[3] = $3; }
 	|	L3_WRACC WS NUM { mcpat_stats->WriteReq_access[3] = $3; }
-	|	L3_WRMISS WS NUM { mcpat_stats->WriteReq_misses[3] = $3; }
 	|	L3_WRBACK WS NUM { mcpat_stats->Writeback_accesses[3] = $3; }
 	|	L3_WRBMISS WS NUM { mcpat_stats->Writeback_misses_l3 = $3; }		
+  | L3_RDMISS WS NUM { mcpat_stats->l3_read_misses = $3; }
+  | L3_WRMISS WS NUM { mcpat_stats->l3_write_misses = $3; }
+  | L3_RDHIT WS NUM { mcpat_stats->l3_read_hits = $3; }
+  | L3_WRHIT WS NUM { mcpat_stats->l3_write_hits = $3; }
+  | L3_REPLACE WS NUM { mcpat_stats->l3_replacements = $3; }
 	|	MM_NREADS WS NUM { mcpat_stats->memory_reads = $3; }
 	|	MM_NWRITES WS NUM { mcpat_stats->memory_writes = $3; }		
 	;
@@ -580,7 +584,6 @@ void xmlParser() throw()
     findAndSetIntValue(l2_node, "stat", "conflicts", mcpat_stats->l2_replacements);
 
     /* L30 CACHE */    
-    /*
     xml_node<> *l3_node = l2_node->next_sibling();
     checkNode(l3_node, "system.L30", "L30");
     findAndSetValue(l3_node, "param", "L3_config", make_tuple(8,mcpat_param->L3_config[0],
@@ -593,16 +596,14 @@ void xmlParser() throw()
 								     mcpat_param->L3_buffer_sizes[2],
 								     mcpat_param->L3_buffer_sizes[3]));
     findAndSetIntValue(l3_node, "param", "clockrate", mcpat_param->clock_rate);
-    findAndSetIntValue(l3_node, "stat", "read_accesses", mcpat_stats->overall_access[3]-mcpat_stats->WriteReq_access[3]);
-    findAndSetIntValue(l3_node, "stat", "write_accesses", mcpat_stats->overall_access[3] +
-		       mcpat_stats->Writeback_accesses[3] + mcpat_stats->WriteReq_access[3]);
-    findAndSetIntValue(l3_node, "stat", "read_misses", mcpat_stats->overall_misses[3]-mcpat_stats->WriteReq_misses[3]);
-    findAndSetIntValue(l3_node, "stat", "write_misses", mcpat_stats->overall_misses[3]-mcpat_stats->Writeback_misses_l3 +
-		                                        mcpat_stats->WriteReq_misses[3]);
-                                            */
+    findAndSetIntValue(l3_node, "stat", "read_accesses", mcpat_stats->l3_read_misses + mcpat_stats->l3_read_hits);
+    findAndSetIntValue(l3_node, "stat", "write_accesses", mcpat_stats->l3_write_misses + mcpat_stats->l3_write_hits);
+    findAndSetIntValue(l3_node, "stat", "read_misses", mcpat_stats->l3_read_misses);
+    findAndSetIntValue(l3_node, "stat", "write_misses", mcpat_stats->l3_write_misses);
+    findAndSetIntValue(l3_node, "stat", "conflicts", mcpat_stats->l3_replacements);
 
     /* TODO: NoC */
-    xml_node<> *noc_node = l2_node->next_sibling();
+    xml_node<> *noc_node = l3_node->next_sibling();
     checkNode(noc_node, "system.NoC0", "noc0");
     
     /* Main memory */

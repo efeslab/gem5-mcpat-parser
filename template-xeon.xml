@@ -327,7 +327,6 @@
 		</component>
 		
 <!--**********************************************************************-->
-<!--
 <component id="system.L30" name="L30">
 				<param name="L3_config" value="16777216,64,16, 16, 16, 100,1"/>
 				<param name="clockrate" value="850"/>
@@ -343,7 +342,6 @@
 				<stat name="conflicts" value="0"/>	
 				<stat name="duty_cycle" value="1"/>	
 		</component>
--->
 <!--**********************************************************************-->
 		<component id="system.NoC0" name="noc0">
 			<param name="clockrate" value="3400"/>

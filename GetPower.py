@@ -188,7 +188,7 @@ def run_mcpat(stats_dir):
     leakage = re.sub(' W', '', leakage) 
     dynamic = re.sub(' W', '', dynamic) 
 
-    print("{} finished. Area={}, Peak={}, Leakage={}, Dynamic={}".format(stats_dir.name, area, peak, leakage, dynamic))
+    print("{}: area={}, peak={}, leakage={}, dynamic={}".format(stats_dir.name, area, peak, leakage, dynamic))
 
     return (True, float(area), float(peak), float(leakage), float(dynamic))
 
@@ -205,6 +205,8 @@ def main():
                 help="force to rerun even file exists")
     parser.add_option("-d", "--dolma", action="store_true", dest="dolma", default=False,
                 help="use dolma mode")
+    parser.add_option("-o", "--output", action="store", dest="output",
+                help="the output file")
     (options, args) = parser.parse_args()
 
     if options.config is not None and options.dir is not None:
@@ -213,6 +215,11 @@ def main():
 
     if options.nworkers is None:
         print("must specify number of workers")
+        exit(10)
+
+    if options.output is None:
+        print("must specify output file")
+        exit(20)
 
     summary_list = []
 
@@ -232,6 +239,7 @@ def main():
             if child.is_file() and str(child).endswith(".json"):
                 summary_list.append(str(child))
 
+    bench_results = {}
     print("{} summary files".format(len(summary_list)))
     for summary in summary_list:
         with Path(summary).open() as f:
@@ -257,7 +265,97 @@ def main():
         with Pool(options.nworkers) as pool:
             result_array = pool.map(run_mcpat, checkpoints)
 
-        print(result_array)
+        #print(result_array)
+
+        area = 0
+        peak = 0
+        leakage = 0
+        dynamic = 0
+        dmax = 0
+        cnt = 0
+
+        for v, a, p, l, d in result_array:
+            if not v:
+                continue
+
+            cnt += 1
+            area += a
+            peak += p
+            leakage += l
+            dynamic += d
+            if d > dmax:
+                dmax = d
+
+        area /= cnt
+        peak /= cnt
+        leakage /= cnt
+        dynamic /= cnt
+
+        print("{}:{}: area={:0.4f}, peak={:0.4f}, leakage={:0.4f}, avg dyn={:0.4f}, max dyn={:0.4f}"\
+                    .format(mode, bench, area, peak, leakage, dynamic, dmax))
+
+        entry = {}
+        #entry['mode'] = mode
+        entry['bench'] = bench
+        entry['area'] = area
+        entry['peak'] = peak
+        entry['leakage'] = leakage
+        entry['average_dynamic'] = dynamic
+        entry['max_dynamic'] = dmax
+
+        #print(json.dumps(entry))
+
+        if not mode in bench_results:
+            bench_results[mode] = []
+        bench_results[mode].append(entry)
+
+    print(bench_results)
+
+    mode_results = {}
+    for mode in bench_results:
+        area = 0
+        peak = 0
+        leakage = 0
+        avgdyn = 0
+        avgdmax = 0
+        dmaxmax = 0
+        cnt = 0
+
+        for entry in bench_results[mode]:
+            cnt += 1
+            area += entry['area']
+            peak += entry['peak']
+            leakage += entry['leakage']
+            avgdyn += entry['average_dynamic']
+            avgdmax += entry['max_dynamic']
+            if entry['max_dynamic'] > dmaxmax:
+                dmaxmax = entry['max_dynamic']
+
+        area /= cnt
+        peak /= cnt
+        leakage /= cnt
+        avgdyn /= cnt
+        avgdmax /= cnt
+
+        e = {}
+        e['area'] = area
+        e['peak'] = peak
+        e['leakage'] = leakage
+        e['average_dynamic'] = avgdyn
+        e['average_max_dynamic'] = avgdmax
+        e['max_max_dynamic'] = dmaxmax
+
+        mode_results[mode] = e
+
+    print(mode_results)
+
+    r = {}
+    r['by_mode'] = mode_results
+    r['by_bench'] = bench_results
+
+    ofile = Path(options.output)
+    with ofile.open('w') as f:
+        f.write(json.dumps(r, indent=4))
 
     return 0
 

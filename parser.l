@@ -680,12 +680,12 @@ I1                  "system.cpu.icache."
     return COMCALLS;
 }
 
-<INITIAL>{CPU}"iq.FU_type_0::IntDiv" {
+<INITIAL>{CPU}"iq.FU_type_0::IntDiv"|{CPU}"iq.FU_type_1::IntDiv" {
     BEGIN(DELIM);
     return INTDIV;
 }
 
-<INITIAL>{CPU}"iq.FU_type_0::IntMult" {
+<INITIAL>{CPU}"iq.FU_type_0::IntMult"|{CPU}"iq.FU_type_1::IntMult {
     BEGIN(DELIM);
     return INTMULT;
 }
@@ -865,29 +865,29 @@ I1                  "system.cpu.icache."
     return L3_ACC;
 }
 
-<INITIAL>{SL3}"overall_misses::total" {
+<INITIAL>{SL3}"read_misses::total" {
     BEGIN(DELIM);
-    return L3_MISS;
+    return L3_RDMISS;
 }
 
-<INITIAL>{SL3}"WriteReq_accesses::total" {
+<INITIAL>{SL3}"read_hits::total" {
     BEGIN(DELIM);
-    return L3_WRACC;
+    return L3_RDHIT;
 }
 
-<INITIAL>{SL3}"WriteReq_misses::total" {
+<INITIAL>{SL3}"write_misses::total" {
     BEGIN(DELIM);
     return L3_WRMISS;
 }
 
-<INITIAL>{SL3}"Writeback_accesses::total" {
+<INITIAL>{SL3}"write_hits::total" {
     BEGIN(DELIM);
-    return L3_WRBACK;
+    return L3_WRHIT;
 }
 
-<INITIAL>{SL3}"Writeback_misses::total" {
+<INITIAL>{SL3}"replacements" {
     BEGIN(DELIM);
-    return L3_WRBMISS;
+    return L3_REPLACE;
 }
 
    /* MAIN MEMORY */
