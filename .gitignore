@@ -9,3 +9,4 @@ config.ini
 *.o
 gem5-mcpat-parser
 __pycache__
+*.json

@@ -309,7 +309,9 @@ def main():
             bench_results[mode] = []
         bench_results[mode].append(entry)
 
-    print(bench_results)
+        print()
+
+    #print(bench_results)
 
     mode_results = {}
     for mode in bench_results:
@@ -317,6 +319,7 @@ def main():
         peak = 0
         leakage = 0
         avgdyn = 0
+        avgdynmax = 0
         avgdmax = 0
         dmaxmax = 0
         cnt = 0
@@ -328,6 +331,8 @@ def main():
             leakage += entry['leakage']
             avgdyn += entry['average_dynamic']
             avgdmax += entry['max_dynamic']
+            if entry['average_dynamic'] > avgdynmax:
+                avgdynmax = entry['average_dynamic']
             if entry['max_dynamic'] > dmaxmax:
                 dmaxmax = entry['max_dynamic']
 
@@ -342,20 +347,27 @@ def main():
         e['peak'] = peak
         e['leakage'] = leakage
         e['average_dynamic'] = avgdyn
+        e['max_average_dynamic'] = avgdynmax
         e['average_max_dynamic'] = avgdmax
         e['max_max_dynamic'] = dmaxmax
 
         mode_results[mode] = e
 
-    print(mode_results)
+    #print(mode_results)
 
     r = {}
     r['by_mode'] = mode_results
     r['by_bench'] = bench_results
 
     ofile = Path(options.output)
-    with ofile.open('w') as f:
-        f.write(json.dumps(r, indent=4))
+
+    try:
+        with ofile.open('w') as f:
+            f.write(json.dumps(r, indent=4))
+        print("Results dumped to {}".format(options.output))
+    except:
+        print("Something went wrong regarding {}, dump the results below:".format(options.output))
+        print(json.dumps(r, indent=4))
 
     return 0
 
