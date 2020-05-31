@@ -142,6 +142,8 @@ def run_mcpat(stats_dir):
         if options.dolma:
             parser_args.append("--dolma")
 
+        #print(parser_args)
+
         try:
             parser_process = Popen(parser_args, stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
             parser_process.wait()
@@ -207,6 +209,8 @@ def main():
                 help="use dolma mode")
     parser.add_option("-o", "--output", action="store", dest="output",
                 help="the output file")
+    parser.add_option("-b", "--base-dir", action="store", type="string", dest="basedir",
+                metavar="DIR", help="the base directory in config mode")
     (options, args) = parser.parse_args()
 
     if options.config is not None and options.dir is not None:
@@ -230,6 +234,15 @@ def main():
             exit(2)
         with conf.open() as f:
             summary_list = f.read().splitlines()
+        if options.basedir is not None:
+            basedir = Path(options.basedir)
+            if not basedir.exists() or not basedir.is_dir():
+                print("path error")
+                exit(2)
+            basedir = options.basedir
+        else:
+            print("must provide base-dir in config mode")
+            exit(3)
     elif options.dir is not None:
         cdir = Path(options.dir)
         if not cdir.exists() or not cdir.is_dir():
@@ -238,6 +251,7 @@ def main():
         for child in cdir.iterdir():
             if child.is_file() and str(child).endswith(".json"):
                 summary_list.append(str(child))
+        basedir = options.dir
 
     bench_results = {}
     print("{} summary files".format(len(summary_list)))
@@ -250,10 +264,19 @@ def main():
         successful_checkpoints = summary_dict['successful_checkpoints']
         failed_checkpoints = summary_dict['failed_checkpoints']
 
+        if successful_checkpoints == 0:
+            continue
+
         checkpoints = []
         for checkpoint in summary_dict['checkpoints']:
             if summary_dict['checkpoints'][checkpoint] == "successful":
+                checkpoint = checkpoint.split('/')
+                #print(checkpoint)
+                checkpoint = basedir + '/' + bench + '_' + mode + '_' + checkpoint[-1]
                 checkpoints.append(checkpoint)
+
+        #print(checkpoints)
+        #exit(0)
 
         print("summary file: {}".format(summary))
         print("successful checkpoints: {}".format(successful_checkpoints))

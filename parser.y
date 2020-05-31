@@ -585,26 +585,33 @@ void xmlParser() throw()
 
     /* L30 CACHE */    
     xml_node<> *l3_node = l2_node->next_sibling();
-    checkNode(l3_node, "system.L30", "L30");
-    findAndSetValue(l3_node, "param", "L3_config", make_tuple(8,mcpat_param->L3_config[0],
-							      mcpat_param->L3_config[1],
-							      mcpat_param->L3_config[2],
-							      1,mcpat_param->l3hit_lat + mcpat_param->l3resp_lat,
-							      mcpat_param->l3hit_lat + mcpat_param->l3resp_lat, 32, 1));
-    findAndSetValue(l3_node, "param", "buffer_sizes", make_tuple(4,mcpat_param->L3_buffer_sizes[0],
-								     mcpat_param->L3_buffer_sizes[1],
-								     mcpat_param->L3_buffer_sizes[2],
-								     mcpat_param->L3_buffer_sizes[3]));
-    findAndSetIntValue(l3_node, "param", "clockrate", mcpat_param->clock_rate);
-    findAndSetIntValue(l3_node, "stat", "read_accesses", mcpat_stats->l3_read_misses + mcpat_stats->l3_read_hits);
-    findAndSetIntValue(l3_node, "stat", "write_accesses", mcpat_stats->l3_write_misses + mcpat_stats->l3_write_hits);
-    findAndSetIntValue(l3_node, "stat", "read_misses", mcpat_stats->l3_read_misses);
-    findAndSetIntValue(l3_node, "stat", "write_misses", mcpat_stats->l3_write_misses);
-    findAndSetIntValue(l3_node, "stat", "conflicts", mcpat_stats->l3_replacements);
+    if (mcpat_param->l3_avail != 0) {
+      checkNode(l3_node, "system.L30", "L30");
+      findAndSetValue(l3_node, "param", "L3_config", make_tuple(8,mcpat_param->L3_config[0],
+                      mcpat_param->L3_config[1],
+                      mcpat_param->L3_config[2],
+                      1,mcpat_param->l3hit_lat + mcpat_param->l3resp_lat,
+                      mcpat_param->l3hit_lat + mcpat_param->l3resp_lat, 32, 1));
+      findAndSetValue(l3_node, "param", "buffer_sizes", make_tuple(4,mcpat_param->L3_buffer_sizes[0],
+                       mcpat_param->L3_buffer_sizes[1],
+                       mcpat_param->L3_buffer_sizes[2],
+                       mcpat_param->L3_buffer_sizes[3]));
+      findAndSetIntValue(l3_node, "param", "clockrate", mcpat_param->clock_rate);
+      findAndSetIntValue(l3_node, "stat", "read_accesses", mcpat_stats->l3_read_misses + mcpat_stats->l3_read_hits);
+      findAndSetIntValue(l3_node, "stat", "write_accesses", mcpat_stats->l3_write_misses + mcpat_stats->l3_write_hits);
+      findAndSetIntValue(l3_node, "stat", "read_misses", mcpat_stats->l3_read_misses);
+      findAndSetIntValue(l3_node, "stat", "write_misses", mcpat_stats->l3_write_misses);
+      findAndSetIntValue(l3_node, "stat", "conflicts", mcpat_stats->l3_replacements);
+    }
 
     /* TODO: NoC */
     xml_node<> *noc_node = l3_node->next_sibling();
     checkNode(noc_node, "system.NoC0", "noc0");
+    findAndSetIntValue(noc_node, "param", "clockrate", mcpat_param->clock_rate);
+
+    if (mcpat_param->l3_avail == 0) {
+      sys_node->remove_node(l3_node);
+    }
     
     /* Main memory */
     xml_node<> *mc_node = noc_node->next_sibling();

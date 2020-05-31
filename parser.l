@@ -685,7 +685,7 @@ I1                  "system.cpu.icache."
     return INTDIV;
 }
 
-<INITIAL>{CPU}"iq.FU_type_0::IntMult"|{CPU}"iq.FU_type_1::IntMult {
+<INITIAL>{CPU}"iq.FU_type_0::IntMult"|{CPU}"iq.FU_type_1::IntMult" {
     BEGIN(DELIM);
     return INTMULT;
 }
