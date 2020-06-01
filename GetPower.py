@@ -117,6 +117,7 @@ def run_mcpat(stats_dir):
     stats = stats_dir / "stats.backup.txt"
     confxml = stats_dir / "configuration.xml"
     result = stats_dir / "result.txt"
+    log = stats_dir / "log.txt"
 
     if not stats_dir.exists():
         print("{} does not exist".format(str(stats_dir)))
@@ -127,6 +128,11 @@ def run_mcpat(stats_dir):
     if not stats.exists():
         print("{} does not exist".format(str(stats)))
         return (False, None, None, None, None)
+
+    is_dolma = False
+    dirstr = str(stats_dir)
+    if "default" in dirstr or "conservative" in dirstr:
+        is_dolma = True
 
     if options.rerun or not confxml.exists():
         parser_args = []
@@ -139,14 +145,17 @@ def run_mcpat(stats_dir):
         parser_args.append(str(template))
         parser_args.append("-o")
         parser_args.append(str(confxml))
-        if options.dolma:
+        if is_dolma:
             parser_args.append("--dolma")
+            print("dolma! wolf! wolf! wolf!")
 
         #print(parser_args)
 
         try:
-            parser_process = Popen(parser_args, stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
+            parser_process = Popen(parser_args, stdin=DEVNULL, stdout=PIPE, stderr=DEVNULL)
             parser_process.wait()
+            with log.open('wb') as ll:
+                ll.write(parser_process.stdout.read())
         except:
             print("{}: parsing gem5 stats failed".format(stats_dir.name))
             return (False, None, None, None, None)
@@ -205,8 +214,6 @@ def main():
                 help="the directory of summary files")
     parser.add_option("-f", "--force-rerun", action="store_true", dest="rerun", default=False,
                 help="force to rerun even file exists")
-    parser.add_option("-d", "--dolma", action="store_true", dest="dolma", default=False,
-                help="use dolma mode")
     parser.add_option("-o", "--output", action="store", dest="output",
                 help="the output file")
     parser.add_option("-b", "--base-dir", action="store", type="string", dest="basedir",
