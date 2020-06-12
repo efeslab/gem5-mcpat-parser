@@ -49,6 +49,10 @@ static struct option long_options[] = {
     .has_arg = no_argument,
     .flag = NULL,
     .val = 'd'},
+  { .name = "stt",
+    .has_arg = no_argument,
+    .flag = NULL,
+    .val = 't'},
 	{0, 0, 0, 0}
 };
 
@@ -63,6 +67,7 @@ void usage(int i)
 		"  -s <file>, --stats=<file>: statistics file\n"
 		"  -o <file>, --output=<output>: XML output\n"
     "  -d, --dolma: use dolma config\n"
+    "  -t, --stt: use stt config\n"
 		"  -h, --help: displays this message\n\n");
 	exit(i);
 }
@@ -111,7 +116,7 @@ int handle_options(int argc, char **argv)
 		int flags = 0;
 		int option_index = 0;
 
-		c = getopt_long (argc, argv, "x:c:s:o:d",
+		c = getopt_long (argc, argv, "x:c:s:o:dt",
 				 long_options, &option_index);
 		if (c == -1)
 		    break;
@@ -140,6 +145,7 @@ int handle_options(int argc, char **argv)
 		case 'x': strcpy(xml_file, optarg); break;
     case 'o': strcpy(out_file, optarg); break;
     case 'd': printf("dolma mode enabled!\n"); dolma=true; break;
+    case 't': printf("stt mode enabled!\n"); stt = true; break;
 		case '?':
 		case 'h':
 			usage(0);

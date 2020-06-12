@@ -130,9 +130,12 @@ def run_mcpat(stats_dir):
         return (False, None, None, None, None)
 
     is_dolma = False
+    is_stt = False
     dirstr = str(stats_dir)
-    if "default" in dirstr or "conservative" in dirstr:
+    if "dolma" in dirstr:
         is_dolma = True
+    elif "stt" in dirstr:
+        is_stt = True
 
     if options.rerun or not confxml.exists():
         parser_args = []
@@ -148,6 +151,9 @@ def run_mcpat(stats_dir):
         if is_dolma:
             parser_args.append("--dolma")
             print("dolma! wolf! wolf! wolf!")
+        elif is_stt:
+            parser_args.append("--stt")
+            print("stt! t! t!")
 
         #print(parser_args)
 

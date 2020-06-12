@@ -229,6 +229,7 @@ char out_file[80] = "configuration.xml";
 char conf_file[80] = "config.ini";
 char stats_file[80] = "stats.txt";
 bool dolma = false;
+bool stt = false;
 
 // function headers
 void usage(int i);
