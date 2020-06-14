@@ -6,6 +6,8 @@ import json
 import types
 import math
 import re
+import numpy as np
+import scipy.stats
 from subprocess import Popen, PIPE, DEVNULL
 from optparse import OptionParser
 from pathlib import Path
@@ -15,6 +17,19 @@ gem5_mcpat_parser = Path("/home/jcma/gem5-mcpat-parser/gem5-mcpat-parser")
 mcpat = Path("/home/jcma/cMcPAT/mcpat/mcpat")
 template = Path("/home/jcma/gem5-mcpat-parser/template-xeon.xml")
 
+def mean_confidence_interval(data, confidence=0.95):
+    a = 1.0 * np.array(data)
+    n = len(a)
+    m, se = np.mean(a), scipy.stats.sem(a)
+    h = se * scipy.stats.t.ppf((1 + confidence) / 2., n-1)
+    return m, m-h, m+h
+
+def gmean_confidence_interval(data, confidence=0.95):
+    a = 1.0 * np.array(data)
+    n = len(a)
+    m, se = scipy.stats.gmean(a), scipy.stats.sem(a)
+    h = se * scipy.stats.t.ppf((1 + confidence) / 2., n-1)
+    return m, m-h, m+h
 
 ###################################################################
 # Copied from cMcPAT/Scripts/print_energy.py
@@ -303,10 +318,10 @@ def main():
 
         #print(result_array)
 
-        area = 0
-        peak = 0
-        leakage = 0
-        dynamic = 0
+        area = []
+        peak = []
+        leakage = []
+        dynamic = []
         dmax = 0
         cnt = 0
 
@@ -315,20 +330,23 @@ def main():
                 continue
 
             cnt += 1
-            area += a
-            peak += p
-            leakage += l
-            dynamic += d
+            area.append(a)
+            peak.append(p)
+            leakage.append(l)
+            dynamic.append(d)
             if d > dmax:
                 dmax = d
 
-        area /= cnt
-        peak /= cnt
-        leakage /= cnt
-        dynamic /= cnt
+        area = np.mean(area)
+        peak = np.mean(peak)
+        leakage = np.mean(leakage)
+        dyn_bundle = mean_confidence_interval(dynamic, 0.95)
+        dynamic = dyn_bundle[0]
+        dynamic_lh = dyn_bundle[1]
+        dynamic_rh = dyn_bundle[2]
 
-        print("{}:{}: area={:0.4f}, peak={:0.4f}, leakage={:0.4f}, avg dyn={:0.4f}, max dyn={:0.4f}"\
-                    .format(mode, bench, area, peak, leakage, dynamic, dmax))
+        print("{}:{}: area={:0.4f}, peak={:0.4f}, leakage={:0.4f}, avg dyn={:0.4f}-{:0.4f}-{:0.4}, max dyn={:0.4f}"\
+                    .format(mode, bench, area, peak, leakage, dynamic, dynamic_lh, dynamic_rh, dmax))
 
         entry = {}
         #entry['mode'] = mode
@@ -337,6 +355,8 @@ def main():
         entry['peak'] = peak
         entry['leakage'] = leakage
         entry['average_dynamic'] = dynamic
+        entry['dynamic-h'] = dynamic_lh
+        entry['dynamic+h'] = dynamic_rh
         entry['max_dynamic'] = dmax
 
         #print(json.dumps(entry))
@@ -354,7 +374,7 @@ def main():
         area = 0
         peak = 0
         leakage = 0
-        avgdyn = 0
+        avgdyn = []
         avgdynmax = 0
         avgdmax = 0
         dmaxmax = 0
@@ -365,7 +385,7 @@ def main():
             area += entry['area']
             peak += entry['peak']
             leakage += entry['leakage']
-            avgdyn += entry['average_dynamic']
+            avgdyn.append(entry['average_dynamic'])
             avgdmax += entry['max_dynamic']
             if entry['average_dynamic'] > avgdynmax:
                 avgdynmax = entry['average_dynamic']
@@ -375,7 +395,10 @@ def main():
         area /= cnt
         peak /= cnt
         leakage /= cnt
-        avgdyn /= cnt
+        avgdyn_bundle = gmean_confidence_interval(avgdyn, 0.95)
+        avgdyn = avgdyn_bundle[0]
+        avgdyn_lh = avgdyn_bundle[1]
+        avgdyn_rh = avgdyn_bundle[2]
         avgdmax /= cnt
 
         e = {}
@@ -383,6 +406,8 @@ def main():
         e['peak'] = peak
         e['leakage'] = leakage
         e['average_dynamic'] = avgdyn
+        e['average_dynamic-h'] = avgdyn_lh
+        e['average_dynamic+h'] = avgdyn_rh
         e['max_average_dynamic'] = avgdynmax
         e['average_max_dynamic'] = avgdmax
         e['max_max_dynamic'] = dmaxmax
